@@ -5,13 +5,12 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-# Initialize Flask app
+
 app = Flask(__name__)
 
-# Initialize the ApifyClient with your API token
 client = ApifyClient("**************************************")
 
-# Function to perform sentiment analysis
+
 def analyze_sentiment(text):
     analysis = TextBlob(text)
     if analysis.sentiment.polarity > 0:
@@ -31,11 +30,11 @@ def SendMail(data1):
     formatted_data = '\n'.join(['-'.join(item) for item in data1])
     message['Subject'] = "Sentiment Analysis of your latest post"
 
-# Add body to email
+
     body = formatted_data
     message.attach(MIMEText(body, 'plain'))
 
-# Connect to SMTP server
+
     with smtplib.SMTP('smtp.gmail.com', 587) as server:
       server.starttls()  # Secure the connection
       # Login to your email account
@@ -46,15 +45,15 @@ def SendMail(data1):
    
         
 
-# Route for home page
+
 @app.route('/')
 def home():
     return render_template('index.html')
 
-# Route for sentiment analysis
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    # Get URL from the form
+   
     url = request.form['url']
     
     # Prepare the Actor input
@@ -65,15 +64,14 @@ def analyze():
         "viewOption": "RANKED_UNFILTERED",
     }
 
-    # Run the Actor and wait for it to finish
+
     run = client.actor("KoJrdxJCTtpon81KY").call(run_input=run_input)
 
-    # Fetch and print Actor results from the run's dataset (if there are any)
     for item in client.dataset(run["defaultDatasetId"]).iterate_items():
         ab = item['url']
         # print(ab)
 
-    # Run the Actor for the next step
+
     run_input = {
         "startUrls": [{"url": ab}],
         "resultsLimit": 100,
@@ -83,7 +81,7 @@ def analyze():
 
     run = client.actor("us5srxAYnsrkgUv2v").call(run_input=run_input)
 
-    # Fetch and analyze comment sentiments
+
     comment_sentiments = []
     for item in client.dataset(run["defaultDatasetId"]).iterate_items():
         if 'text' not in item:
